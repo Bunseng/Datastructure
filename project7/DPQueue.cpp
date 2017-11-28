@@ -89,16 +89,22 @@ namespace CS3358_FA17A7
    p_queue::p_queue(size_type initial_capacity)
    {
       cerr << "p_queue(size_type initial_capacity) not implemented yet" << endl;
+      heap = new ItemType[0];
+      used = 0;
+      capacity = initial_capacity;
+
    }
 
    p_queue::p_queue(const p_queue& src)
    {
       cerr << "p_queue(const p_queue&) not implemented yet" << endl;
+      *this = src.capacity;
    }
 
    p_queue::~p_queue()
    {
       cerr << "~p_queue() not implemented yet" << endl;
+      delete [] heap;
    }
 
    // MODIFICATION MEMBER FUNCTIONS
@@ -122,14 +128,12 @@ namespace CS3358_FA17A7
 
    p_queue::size_type p_queue::size() const
    {
-      cerr << "size() not implemented yet" << endl;
-      return 0; // dummy return value
+      return used; 
    }
 
    bool p_queue::empty() const
    {
-      cerr << "empty() not implemented yet" << endl;
-      return false; // dummy return value
+      return used = 0;
    }
 
    p_queue::value_type p_queue::front() const
@@ -208,7 +212,12 @@ namespace CS3358_FA17A7
    // Pre:  (i > 0) && (i < used)
    // Post: The item at heap[i] has been swapped with its parent.
    {
-      cerr << "swap_with_parent(size_type) not implemented yet" << endl;
+      assert(i > 0 && i < used)
+      size type index = parent_index[i];
+      ItemType temp = heap[index];
+      heap[index] = parent_index[i];
+      parent_index[i] = temp;
+
    }
 }
 
