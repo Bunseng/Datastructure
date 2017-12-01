@@ -13,6 +13,14 @@ using namespace std;
 void HashTable::rehash()
 {
    // to be implemented as part of Assignment 8
+   HashTable *table = data->capacity;
+   table->capacity = 2*capacity;
+   	capacity = 2*capacity;
+   for(size_type i = 0; i < capacity; i++){
+	if(table[i].word)
+		insert(table[i].used, table);
+   }
+   return table;
 }
 
 // returns true if cStr already exists in the hash table,
@@ -43,6 +51,7 @@ double HashTable::load_factor() const
 HashTable::size_type HashTable::hash(const char* word) const
 {
    // to be implemented as part of Assignment 8
+   return used/capacity;
 }
 
 // constructs an empty initial hash table
