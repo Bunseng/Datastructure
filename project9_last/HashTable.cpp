@@ -40,6 +40,19 @@ bool HashTable::exists(const char* cStr) const
 bool HashTable::search(const char* cStr) const
 {
    // to be implemented as part of Assignment 8
+   size_type hashIndex = hash(cStr);
+
+   while(data[hashIndex]->cStr != NULL){
+   if(capacity[hashIndex]->cStr == cStr)
+	   return capacity[hashIndex];
+
+   hashIndex++;
+   hashIndex %= capacity;
+
+   }
+
+   return false;
+
 }
 
 // returns load-factor calculated as a fraction
@@ -130,6 +143,16 @@ void HashTable::grading_helper_print(ostream& out) const
 void HashTable::insert(const char* cStr)
 {
    // to be implemented as part of Assignment 8
+   struct Item *newItem = (struct Item*) malloc(sizeof(struct Item));
+   newItem->data = data;
+   item->cStr = cStr;
+   size_type hashIndex = hash(cStr);
+
+   while(capacity[hashIndex] != NULL && capacity[hashIndex]->cStr != -1){
+	++hashIndex;
+	hashIndex %= used;
+   }	   
+   capacity[hashIndex] = newItem;
 }
 
 // adaption of : http://stackoverflow.com/questions/4475996
