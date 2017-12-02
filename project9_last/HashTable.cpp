@@ -13,14 +13,22 @@ using namespace std;
 void HashTable::rehash()
 {
    // to be implemented as part of Assignment 8
-   HashTable *table = data->capacity;
+  /* HashTable *table = data->capacity;
    table->capacity = 2*capacity;
    	capacity = 2*capacity;
    for(size_type i = 0; i < capacity; i++){
 	if(table[i].word)
 		insert(table[i].used, table);
    }
-   return table;
+   return table; */
+
+   size_type old_cap = capacity;
+   size_type new_cap = next_prime(2*old_cap);
+   HashTable new_table(new_cap);
+   for(size_type i = 0; i < old_cap; i++)
+	   new_table.insert(data[i].word);
+   free(this);
+   *this = new_table;
 }
 
 // returns true if cStr already exists in the hash table,
@@ -40,18 +48,25 @@ bool HashTable::exists(const char* cStr) const
 bool HashTable::search(const char* cStr) const
 {
    // to be implemented as part of Assignment 8
-   size_type hashIndex = hash(cStr);
+   /*size_type hashIndex = hash(cStr);
 
    while(data[hashIndex]->cStr != NULL){
    if(capacity[hashIndex]->cStr == cStr)
-	   return capacity[hashIndex];
+	   return true;
 
    hashIndex++;
    hashIndex %= capacity;
 
    }
 
-   return false;
+   return false; */
+  // size_type index = hash(cStr);	
+   for(size_type i = 0; i < capacity; i++){
+	   if(data[i].word && data[i].word == cStr){
+		  return true;
+	    }
+    }
+    return false; 
 
 }
 
