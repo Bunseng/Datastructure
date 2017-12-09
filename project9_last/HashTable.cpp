@@ -12,32 +12,33 @@ using namespace std;
 // (HINT: put next_prime and insert to good use)
 void HashTable::rehash()
 {
-   // to be implemented as part of Assignment 8
-  /* HashTable *table = data->capacity;
-   table->capacity = 2*capacity;
-   	capacity = 2*capacity;
-   for(size_type i = 0; i < capacity; i++){
-	if(table[i].word)
-		insert(table[i].used, table);
-   }
-   return table; */
+	size_type old_capacity = capacity;
+	size_type new_capacity = next_prime(2 * old_capacity);
 
-   size_type old_cap = capacity;
-   size_type new_cap = next_prime(2*old_cap);
-   HashTable new_table(new_cap);
-   for(size_type i = 0; i < old_cap; i++)
-	   new_table.insert(data[i].word);
-   free(this);
-   *this = new_table;
+	Item * new_data = new Item[new_capacity];
+	Item * old_data = data;
+	for (size_type i = 0; i < new_capacity; ++i)
+		strcpy(new_data[i].word, "");
+
+	data = new_data;
+	capacity = new_capacity;
+	used = 0;
+
+	for (size_type i = 0; i < old_capacity; i++){
+		if(strcmp(old_data[i].word, "") != 0)
+			insert(old_data[i].word);
+	}
+	delete[] old_data;
+
 }
 
 // returns true if cStr already exists in the hash table,
 // otherwise returns false
 bool HashTable::exists(const char* cStr) const
 {
-   for (size_type i = 0; i < capacity; ++i)
-      if ( ! strcmp(data[i].word, cStr) ) return true;
-   return false;
+	for (size_type i = 0; i < capacity; ++i)
+		if ( ! strcmp(data[i].word, cStr) ) return true;
+	return false;
 }
 
 // returns true if cStr can be found in the hash table
@@ -47,26 +48,23 @@ bool HashTable::exists(const char* cStr) const
 // CAUTION: major penalty if not using hashing technique
 bool HashTable::search(const char* cStr) const
 {
-   // to be implemented as part of Assignment 8
-   /*size_type hashIndex = hash(cStr);
-
-   while(data[hashIndex]->cStr != NULL){
-   if(capacity[hashIndex]->cStr == cStr)
-	   return true;
-
-   hashIndex++;
-   hashIndex %= capacity;
-
-   }
-
-   return false; */
-  // size_type index = hash(cStr);	
-   for(size_type i = 0; i < capacity; i++){
-	   if(data[i].word && data[i].word == cStr){
-		  return true;
-	    }
-    }
-    return false; 
+	 size_type temp = hash(cStr),
+		   loc = temp,
+	 	   h = 1;
+	while(strcmp(data[loc].word, cStr) && strcmp(data[loc].word, ""))
+		loc = (temp + ((h++)^2)) % capacity;
+	if(strcmp(data[loc].word, "")) return true;
+	return false;
+	/*size_type index = hash(cStr);
+        for(size_type i = 0; i < capacity; i++){
+		if(index == hash(data[i].word)) return true;
+	return false;
+	}*/
+        /*size_type index = hash(cStr) % capacity;
+	for(size_type i = 0; i < capacity; i++){
+		if(index != hash(data[i].word)) return true;
+	return false;
+	}*/
 
 }
 
@@ -78,21 +76,24 @@ double HashTable::load_factor() const
 // (2nd page of Lecture Note 324s02AdditionalNotesOnHashFunctions)
 HashTable::size_type HashTable::hash(const char* word) const
 {
-   // to be implemented as part of Assignment 8
-   return used/capacity;
+	size_type hash = 5381;
+	size_type c;
+   	while (c = *word++)
+        	hash = ((hash << 5) + hash) + c;
+    	return hash % capacity;
 }
 
 // constructs an empty initial hash table
 HashTable::HashTable(size_type initial_capacity)
           : capacity(initial_capacity), used(0)
 {
-   if (capacity < 11)
-      capacity = next_prime(INIT_CAP);
-   else if ( ! is_prime(capacity))
-      capacity = next_prime(capacity);
-   data = new Item[capacity];
-   for (size_type i = 0; i < capacity; ++i)
-      strcpy(data[i].word, "");
+	if (capacity < 11)
+		capacity = next_prime(INIT_CAP);
+	else if ( ! is_prime(capacity))
+		capacity = next_prime(capacity);
+	data = new Item[capacity];
+	for (size_type i = 0; i < capacity; ++i)
+		strcpy(data[i].word, "");
 }
 
 // returns dynamic memory used by the hash table to heap
@@ -110,44 +111,44 @@ HashTable::size_type HashTable::size() const
 // items are distributed over the hash table
 void HashTable::scat_plot(ostream& out) const
 {
-   out << endl << "Scatter plot of where hash table is used:";
-   size_type lo_index = 0,
-             hi_index = capacity - 1,
-             width;
-   if (capacity >= 100000)
-      width = capacity / 250;
-   else if (capacity >= 10000)
-      width = capacity / 25;
-   else
-      width = capacity / 10;
-   size_type max_digits = size_type( floor( log10(hi_index) ) + 1 ),
-             label_beg  = lo_index,
-             label_end  = label_beg + width - 1;
-   for(label_beg = lo_index; label_beg <= hi_index; label_beg += width)
-   {
-      out << endl;
-      if( label_end > hi_index)
-         out << setw(max_digits) << label_beg << " - " << setw(max_digits) << hi_index << ": ";
-      else
-         out << setw(max_digits) << label_beg << " - " << setw(max_digits) << label_end << ": ";
-      size_type i = label_beg;
-      while ( i <= label_end && i <= hi_index)
-      {
-         if (data[i].word[0] != '\0')
-            out << '*';
-         ++i;
-      }
-      label_end = label_end + width;
-   }
-   out << endl << endl;
+	out << endl << "Scatter plot of where hash table is used:";
+	size_type lo_index = 0,
+			  hi_index = capacity - 1,
+			  width;
+	if (capacity >= 100000)
+		width = capacity / 250;
+	else if (capacity >= 10000)
+		width = capacity / 25;
+	else
+		width = capacity / 10;
+	size_type max_digits = size_type( floor( log10(hi_index) ) + 1 ),
+			  label_beg  = lo_index,
+			  label_end  = label_beg + width - 1;
+	for(label_beg = lo_index; label_beg <= hi_index; label_beg += width)
+	{
+		out << endl;
+		if( label_end > hi_index)
+			out << setw(max_digits) << label_beg << " - " << setw(max_digits) << hi_index << ": ";
+		else
+			out << setw(max_digits) << label_beg << " - " << setw(max_digits) << label_end << ": ";
+		size_type i = label_beg;
+		while ( i <= label_end && i <= hi_index)
+		{
+			if (data[i].word[0] != '\0')
+				out << '*';
+			++i;
+		}
+		label_end = label_end + width;
+	}
+	out << endl << endl;
 }
 
 // dumping to out contents of "segment of slots" of the hash table
 void HashTable::grading_helper_print(ostream& out) const
 {
-   out << endl << "Content of selected hash table segment:\n";
-   for (size_type i = 10; i < 30; ++i)
-      out << '[' << i << "]: " << data[i].word << endl;
+	out << endl << "Content of selected hash table segment:\n";
+	for (size_type i = 10; i < 30; ++i)
+		out << '[' << i << "]: " << data[i].word << endl;
 }
 
 // cStr (assumed to be currently non-existant in the hash table)
@@ -157,17 +158,19 @@ void HashTable::grading_helper_print(ostream& out) const
 // rehash is called to bring down the load-factor)
 void HashTable::insert(const char* cStr)
 {
-   // to be implemented as part of Assignment 8
-   struct Item *newItem = (struct Item*) malloc(sizeof(struct Item));
-   newItem->data = data;
-   item->cStr = cStr;
-   size_type hashIndex = hash(cStr);
 
-   while(capacity[hashIndex] != NULL && capacity[hashIndex]->cStr != -1){
-	++hashIndex;
-	hashIndex %= used;
-   }	   
-   capacity[hashIndex] = newItem;
+	size_type temp = hash(cStr),
+		  loc = temp,
+		  h = 1;
+	while(strcmp(data[loc].word, "")){
+		loc = (temp + ((h++)^2)) % capacity;
+	}
+	strcpy(data[loc].word, cStr);
+	used++;
+
+	if (load_factor() > 0.45)
+		rehash();
+
 }
 
 // adaption of : http://stackoverflow.com/questions/4475996
@@ -179,20 +182,20 @@ void HashTable::insert(const char* cStr)
 //   it is of the form 6k+1 or of the form 6k+5
 bool is_prime(HashTable::size_type x)
 {
-   if (x <= 3 || x == 5) return true;
-   if (x == 4 || x == 6) return false;
+	if (x <= 3 || x == 5) return true;
+	if (x == 4 || x == 6) return false;
 
-   HashTable::size_type inc = 4;
-   for (HashTable::size_type i = 5; true; i += inc)
-   {
-      HashTable::size_type q = x / i;
-      if (q < i)
-         return true;
-      if (x == q * i)
-         return false;
-      inc ^= 6;
-   }
-   return true;
+	HashTable::size_type inc = 4;
+	for (HashTable::size_type i = 5; true; i += inc)
+	{
+		HashTable::size_type q = x / i;
+		if (q < i)
+			return true;
+		if (x == q * i)
+			return false;
+		inc ^= 6;
+	}
+	return true;
 }
 
 // adaption of : http://stackoverflow.com/questions/4475996
@@ -200,8 +203,8 @@ bool is_prime(HashTable::size_type x)
 // returns the smallest prime that is >= x
 HashTable::size_type next_prime(HashTable::size_type x)
 {
-    switch (x)
-    {
+	switch (x)
+	{
     case 0:
     case 1:
     case 2:
